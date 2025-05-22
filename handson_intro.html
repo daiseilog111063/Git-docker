@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DockerでLaravelを動かそう！ イントロ・Dockerとは？</title>
+  <meta name="viewport" content="width=1024">
+  <style>
+    body { font-family: 'Yomogi', 'Zen Kurenaido', 'Kaisei Decol', sans-serif; background: #fff; color: #334155; margin: 0; padding: 0; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .section-card { background: #fff; border-left: 8px solid #F25C05; border-radius: 10px; margin-bottom: 32px; box-shadow: 0 2px 8px 0 rgba(89,60,71,0.06); padding: 28px 24px 18px 24px; }
+    .section-title { font-size: 1.6em; font-weight: bold; color: #1e293b; display: flex; align-items: center; margin-bottom: 0.7em; }
+    .section-title .icon { margin-right: 10px; font-size: 1.2em; }
+    .info-list, .info-list ul, .info-list ol { font-size: 1em; line-height: 1.7; margin-left: 1.5em; }
+    .mermaid { background: #f8fafc; border-radius: 8px; padding: 12px; margin: 16px 0; font-size: 13px; box-shadow: 0 1px 4px 0 rgba(242,197,60,0.08); }
+    img { max-width: 100%; margin: 16px 0; border-radius: 8px; border: 1px solid #eee; }
+    a { color: #F25C05; text-decoration: underline; }
+    .nav { margin-top: 2em; }
+    .nav a { margin-right: 1.5em; font-weight: bold; }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+<main>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">📝</span>1. そもそもDockerとは？</div>
+  <div class="info-list">
+    <ul>
+      <li><b>「動かない」問題を解決！</b><br>
+        <span style="color:#666;">自分のPCでは動くのに他の人や本番サーバーでは動かない…そんな環境差トラブルをなくします。</span>
+      </li>
+      <li><b>アプリ＋環境を丸ごとパッケージ</b><br>
+        <span style="color:#666;">アプリ本体と必要なOS・ミドルウェア・設定を「コンテナ」として1つにまとめて配布できます。</span>
+      </li>
+      <li><b>どこでも同じ環境を再現</b><br>
+        <span style="color:#666;">Windows/Mac/Linuxやクラウドでも、同じDockerイメージを使えば同じ環境がすぐ作れます。</span>
+      </li>
+      <li><b>Infrastructure as Code</b><br>
+        <span style="color:#666;">環境構築手順も「コード」として管理でき、再現性・自動化が簡単に。</span>
+      </li>
+    </ul>
+    <img src="images/app_plus_env.png" alt="アプリケーションと環境をセットで配布・共有できるDockerイメージの概念図">
+    <div style="color:#666; font-size:0.97em; margin-top:0.5em;">※アプリ本体と必要な環境一式を「Dockerイメージ」としてパッケージ化し、どこでも同じように配布・実行できる</div>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">💡</span>2. Dockerの思想・なぜ生まれたか</div>
+  <div class="info-list">
+    <ul>
+      <li><b>「どこでも同じように動かす」</b><br>
+        <span style="color:#666;">開発・テスト・本番、どこでも同じ環境・同じ挙動を実現するために生まれました。</span>
+      </li>
+      <li><b>VMより軽量・高速</b><br>
+        <span style="color:#666;">仮想マシン（VM）はOSごと仮想化するため重いですが、DockerはホストOSのカーネルを共有し、アプリごとに独立した環境（コンテナ）を作るので軽量＆高速です。</span>
+      </li>
+      <li><b>環境構築も「コード化」</b><br>
+        <span style="color:#666;">Dockerfileで環境構築手順をコードとして管理でき、誰がどこでビルドしても同じ環境が作れます。</span>
+      </li>
+      <li><b>再現性・移植性・スケーラビリティ</b><br>
+        <span style="color:#666;">クラウド・オンプレ・ローカルPCなど、どこでも同じイメージでアプリを動かせます。</span>
+      </li>
+    </ul>
+    <img src="images/vm_vs_docker.png" alt="仮想マシン方式とDocker方式の比較図">
+    <div style="color:#666; font-size:0.97em; margin-top:0.5em;">※VMはOSごと仮想化するため重い／Dockerはカーネルを共有し軽量・高速</div>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">❓</span>3. こんな経験ありませんか？</div>
+  <div class="info-list">
+    <ul>
+      <li><b>「自分のPCでは動くのに、他の人のPCでは動かない」</b><br>
+        <span style="color:#666;">OSやミドルウェア、PHP/Nodeのバージョン違いによる不具合が発生しがち。</span>
+      </li>
+      <li><b>依存パッケージ地獄・謎のエラー</b><br>
+        <span style="color:#666;">必要なパッケージや設定が人によって違い、動かない・エラーが出る。</span>
+      </li>
+      <li><b>本番環境だけで発生するバグ</b><br>
+        <span style="color:#666;">開発環境と本番環境の差分が原因で、予期せぬバグが発生。</span>
+      </li>
+      <li><b>Dockerで解決！</b><br>
+        <span style="color:#666;">アプリと環境を丸ごとパッケージ化し、誰がどこで動かしても「同じ環境・同じ挙動」を保証できます。<br>さらに、GitHubなどでソースコードと環境構成（Dockerfile等）をセットで管理・共有でき、チーム全員が「同じ手順・同じ環境」で開発できます。</span>
+      </li>
+    </ul>
+    <img src="images/env_diff_bug.png" alt="開発者ごとの環境差分と本番バグのイメージ図">
+    <div style="color:#666; font-size:0.97em; margin-top:0.5em;">※開発者や本番の環境が違うと、同じアプリでも動作やバグの発生状況が変わる</div>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="index.html">目次</a>
+  <a href="handson_terms.html">次へ ▶</a>
+</div>
+
+</main>
+</body>
+</html> 

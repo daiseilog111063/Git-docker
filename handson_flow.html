@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DockerでLaravelを動かそう！ ゴール・体験の流れ</title>
+  <meta name="viewport" content="width=1024">
+  <style>
+    body { font-family: 'Yomogi', 'Zen Kurenaido', 'Kaisei Decol', sans-serif; background: #fff; color: #334155; margin: 0; padding: 0; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .section-card { background: #fff; border-left: 8px solid #F25C05; border-radius: 10px; margin-bottom: 32px; box-shadow: 0 2px 8px 0 rgba(89,60,71,0.06); padding: 28px 24px 18px 24px; }
+    .section-title { font-size: 1.6em; font-weight: bold; color: #1e293b; display: flex; align-items: center; margin-bottom: 0.7em; }
+    .section-title .icon { margin-right: 10px; font-size: 1.2em; }
+    .info-list, .info-list ul, .info-list ol { font-size: 1em; line-height: 1.7; margin-left: 1.5em; }
+    pre, code { background: #f8fafc; border-radius: 4px; padding: 2px 6px; font-size: 0.98em; color: #593C47; }
+    pre { padding: 12px; overflow-x: auto; margin: 1em 0; }
+    a { color: #F25C05; text-decoration: underline; }
+    .nav { margin-top: 2em; }
+    .nav a { margin-right: 1.5em; font-weight: bold; }
+  </style>
+</head>
+<body>
+<main>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">🎯</span>6. 今回のゴール</div>
+  <div class="info-list">
+    <ul>
+      <li>「Dockerの本質（使い捨て・再現性）」を体験的に理解する</li>
+      <li>LaravelアプリをDockerで動かし、<b>「消える/残る」</b>を自分で試す</li>
+      <li>GitHubで「環境ごと共有」するメリットを実感する</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">🧭</span>7. なぜこの順番で体験するのか？</div>
+  <div class="info-list">
+    <ul>
+      <li>まず「消える」体験（ボリュームなし）で、<b>コンテナの一時性・使い捨て思想</b>を実感</li>
+      <li>次に「残る」体験（ボリュームあり）で、<b>Volumeの重要性</b>を体感</li>
+      <li>「理屈」より<b>実際に手を動かして体験</b>することで、理解が深まる</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">📁</span>8. GitHubリポジトリ構成（最初はsrcなし）</div>
+  <div class="info-list">
+    <pre>📦 project-root
+ ├─ Dockerfile
+ ├─ README.md
+</pre>
+    <div style="color:#666; font-size:0.97em; margin-top:0.5em;">※最初はsrcディレクトリは存在しません。ボリューム体験の中で作成します。</div>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="handson_terms.html">◀ 前へ</a>
+  <a href="index.html">目次</a>
+  <a href="handson_hands_on.html">次へ ▶</a>
+</div>
+
+</main>
+</body>
+</html> 

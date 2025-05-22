@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>DockerでLaravelを動かそう！</title>
+    <!-- Reveal.js CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/reveal.css">
+    <link rel="stylesheet" href="https://unpkg.com/reveal.js/dist/theme/black.css" id="theme">
+    <style>
+      :root {
+        --primary:#00bfff;
+      }
+      .reveal h1, .reveal h2, .reveal h3 { color: var(--primary); }
+      .reveal pre { font-size: 0.8em; }
+      .img-frame {
+        width: 80%;
+        border: 2px dashed var(--primary);
+        padding: 1rem;
+        margin: 1rem auto;
+        text-align:center;
+        font-style:italic;
+        color:#777;
+      }
+      .hint {
+        color: #ffb300;
+        font-weight: bold;
+      }
+      .error {
+        color: #ff4444;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- Slide 0: タイトル -->
+        <section>
+          <h1>DockerでLaravelを動かそう！</h1>
+          <p>〜ボリュームで学ぶ「消える/残る」体験ハンズオン〜</p>
+        </section>
+
+        <!-- Slide 1: そもそもDockerとは？ -->
+        <section>
+          <h2>そもそもDockerとは？</h2>
+          <ul>
+            <li>「動くはずのコードが<strong>動かない</strong>」問題</li>
+            <li>開発環境の違いを<strong>コンテナ</strong>で解決</li>
+            <li>どこでも同じ環境＝<strong>Infrastructure as Code</strong></li>
+          </ul>
+        </section>
+
+        <!-- Slide 1.2: Dockerの思想・なぜ生まれたか -->
+        <section>
+          <h2>Dockerの思想・なぜ生まれたか</h2>
+          <ul>
+            <li><strong>「アプリ＋必要な環境すべて」をパッケージ化</strong>し、どこでも同じように動かす</li>
+            <li>「動くはずなのに動かない」問題を根本解決</li>
+            <li>従来の仮想マシンより<strong>軽量・高速</strong>な仮想化</li>
+            <li><strong>Infrastructure as Code</strong>で環境構築もコード管理</li>
+            <li>再現性・移植性・スケーラビリティを実現</li>
+          </ul>
+          <div class="img-frame">アプリ本体＋ミドルウェア＋設定 → 1つのイメージ<br>どこでも同じ環境を再現！</div>
+        </section>
+
+        <!-- Slide 1.5: こんな経験ありませんか？（Dockerの必要性の具体例） -->
+        <section>
+          <h2>こんな経験ありませんか？</h2>
+          <ul>
+            <li>「自分のPCでは動くのに、他の人のPCでは動かない…」</li>
+            <li>OSやミドルウェア、PHP/Nodeのバージョン違い</li>
+            <li>"依存パッケージ地獄"や"謎のエラー"</li>
+            <li><strong>Dockerなら「どこでも同じ環境」を再現できる！</strong></li>
+          </ul>
+        </section>
+
+        <!-- Slide 2: 覚えるのはこの3語 -->
+        <section>
+          <h2>覚えるのはこの3語</h2>
+          <ul>
+            <li><strong>Image</strong>（設計図・レシピ）</li>
+            <li><strong>Container</strong>（動く実体）</li>
+            <li><strong>Volume</strong>（データの保存場所・永続化）</li>
+          </ul>
+          <div class="img-frame">🧩<br>Image・Container・Volumeの関係図（イメージ）</div>
+        </section>
+
+        <!-- Slide 2.5: Dockerのライフサイクル -->
+        <section>
+          <h2>Dockerのイメージとコンテナのライフサイクル</h2>
+          <ul>
+            <li><strong>イメージ</strong>：DockerHubからpull or buildで作成</li>
+            <li><strong>コンテナ</strong>：イメージからrunで作成、Created→Up→Exitedの状態遷移</li>
+            <li>コンテナは削除できる（Exited状態でのみ）</li>
+            <li>イメージも削除可能</li>
+            <li><strong>Volume</strong>はコンテナ削除後も残る</li>
+          </ul>
+          <div class="img-frame">
+            イメージ→コンテナ（Created→Up→Exited）→削除<br>
+            Volumeは残る<br>
+            <small>コマンド例: docker run, stop, rm, image rm</small>
+          </div>
+          <pre><code data-trim>
+docker image pull ubuntu
+docker run -it ubuntu
+docker container ls -a
+docker container stop &lt;ID&gt;
+docker container rm &lt;ID&gt;
+docker image rm ubuntu
+          </code></pre>
+          <p style="font-size:0.8em;">参考: <a href="https://qiita.com/kenny_J_7/items/ef4a5eb412ff943410e3" target="_blank">Qiita: Dockerのイメージ/コンテナのライフサイクルと基本操作</a></p>
+        </section>
+
+        <!-- Slide 3: 今回のゴールと構成 -->
+        <section>
+          <h2>今回のゴールと構成</h2>
+          <ul>
+            <li>1コンテナで<strong>Laravel</strong>だけを動かす</li>
+            <li>DBはSQLiteや外部MySQLを使う</li>
+            <li><strong>ボリュームの有無で「プロジェクトが消える/残る」を体験</strong></li>
+          </ul>
+        </section>
+
+        <!-- Slide 4: なぜこの順番で体験するのか？ -->
+        <section>
+          <h2>なぜこの順番で体験するのか？</h2>
+          <ul>
+            <li>まず「消える」体験で、<span class="hint">コンテナの一時性</span>を実感</li>
+            <li>次に「残る」体験で、<span class="hint">Volumeの重要性</span>を体感</li>
+            <li>理屈より<strong>体験</strong>で理解が深まる！</li>
+          </ul>
+        </section>
+
+        <!-- Slide 5: GitHubリポジトリ構成 -->
+        <section>
+          <h2>GitHubリポジトリ構成</h2>
+          <pre><code data-trim>
+📦 project-root
+ ├─ Dockerfile
+ ├─ README.md
+ └─ src/       (Laravelプロジェクトが入る)
+          </code></pre>
+        </section>
+
+        <!-- Slide 6: Hands-on手順（1）「まずは消える体験」 -->
+        <section>
+          <h2>Hands-on手順（1）<br>「まずは消える体験」</h2>
+          <ol>
+            <li>イメージをビルド</li>
+            <li>ボリュームをマウントせずにコンテナ起動</li>
+            <li>コンテナ内で <code>composer create-project</code> でLaravel作成</li>
+            <li>コンテナ削除→再起動→<span class="error">プロジェクトが消えている！</span></li>
+          </ol>
+        </section>
+
+        <!-- Slide 7: Hands-on手順（2）「永続化を体験」 -->
+        <section>
+          <h2>Hands-on手順（2）<br>「永続化を体験」</h2>
+          <ol>
+            <li>ホスト側で空の<code>src</code>ディレクトリ作成</li>
+            <li><code>-v $(pwd)/src:/var/www/html</code> でボリュームマウントして起動</li>
+            <li>コンテナ内で <code>composer create-project</code></li>
+            <li>コンテナ削除→再起動→<span class="hint">プロジェクトが残っている！</span></li>
+          </ol>
+        </section>
+
+        <!-- Slide 8: よくあるエラー・トラブル時のヒント -->
+        <section>
+          <h2>よくあるエラー・トラブル時のヒント</h2>
+          <ul>
+            <li class="error">Directory is not empty<br>→ <span class="hint">srcが空でないとcreate-projectでエラー</span></li>
+            <li class="error">Permission denied<br>→ <span class="hint">srcの権限を確認（chmod/chown）</span></li>
+            <li class="error">ポート競合<br>→ <span class="hint">8080番ポートが他で使われていないか確認</span></li>
+            <li>困ったら <code>docker logs</code> や <code>docker exec -it ... bash</code> で中を見てみよう</li>
+          </ul>
+        </section>
+
+        <!-- Slide 9: まとめ・Volumeの重要性 -->
+        <section>
+          <h2>まとめ：Volumeの重要性</h2>
+          <ul>
+            <li>コンテナは「使い捨て」だが、<strong>Volumeでデータは永続化</strong>できる</li>
+            <li>チーム開発や本番運用でもVolumeは必須</li>
+            <li>今回の体験は、<span class="hint">本番やチーム開発でも超重要！</span></li>
+          </ul>
+        </section>
+
+        <!-- Slide 10: 参考・次のステップ -->
+        <section>
+          <h2>参考・次のステップ</h2>
+          <ul>
+            <li>Docker公式ドキュメント</li>
+            <li>Laravel公式ドキュメント</li>
+            <li>よくあるトラブル・FAQ（Notion等で共有）</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- Reveal.js → Init → 矢印/キーボードで操作可能 -->
+    <script src="https://unpkg.com/reveal.js/dist/reveal.js"></script>
+    <script>
+      Reveal.initialize({ hash:true, slideNumber:true });
+    </script>
+  </body>
+</html>

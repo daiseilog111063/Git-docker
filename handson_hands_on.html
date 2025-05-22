@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DockerでLaravelを動かそう！ Hands-on実践</title>
+  <meta name="viewport" content="width=1024">
+  <style>
+    body { font-family: 'Yomogi', 'Zen Kurenaido', 'Kaisei Decol', sans-serif; background: #fff; color: #334155; margin: 0; padding: 0; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .section-card { background: #fff; border-left: 8px solid #F25C05; border-radius: 10px; margin-bottom: 32px; box-shadow: 0 2px 8px 0 rgba(89,60,71,0.06); padding: 28px 24px 18px 24px; }
+    .section-title { font-size: 1.6em; font-weight: bold; color: #1e293b; display: flex; align-items: center; margin-bottom: 0.7em; }
+    .section-title .icon { margin-right: 10px; font-size: 1.2em; }
+    .info-list, .info-list ul, .info-list ol { font-size: 1em; line-height: 1.7; margin-left: 1.5em; }
+    pre, code { background: #f8fafc; border-radius: 4px; padding: 2px 6px; font-size: 0.98em; color: #593C47; }
+    pre { padding: 12px; overflow-x: auto; margin: 1em 0; }
+    a { color: #F25C05; text-decoration: underline; }
+    .nav { margin-top: 2em; }
+    .nav a { margin-right: 1.5em; font-weight: bold; }
+  </style>
+</head>
+<body>
+<main>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">🖐️</span>9. Hands-on：DockerとGitHubで環境を体験しよう</div>
+  <div class="info-list">
+    <b>9-1. Docker公式イメージからコンテナを作成してみよう</b>
+    <ul>
+      <li><b>1. DockerHubでイメージを探す</b><br>
+        公式イメージ一覧: <a href="https://hub.docker.com/search?q=&type=image" target="_blank">https://hub.docker.com/search?q=&type=image</a>
+      </li>
+      <li><b>2. まずはhello-worldを動かす</b>
+        <pre>docker run hello-world</pre>
+        「Hello from Docker!」が表示されればOK
+      </li>
+      <li><b>3. Ubuntuコンテナでシェルを触ってみる</b>
+        <pre>docker run -it ubuntu bash</pre>
+        <ul>
+          <li>ls, cat /etc/os-release などで中身を確認</li>
+          <li>exitで抜ける</li>
+        </ul>
+      </li>
+      <li><b>4. コンテナのライフサイクルを体験</b>
+        <pre>docker ps -a
+docker rm &lt;コンテナID&gt;
+docker images
+docker rmi &lt;イメージID&gt;</pre>
+        <b>ポイント</b>: コンテナは「使い捨て」、イメージから何度でも作り直せる
+      </li>
+    </ul>
+    <hr>
+    <b>9-2. GitHubからLaravelリポジトリをクローン</b>
+    <ul>
+      <li><b>1. リポジトリをクローン</b>
+        <pre>git clone https://github.com/daiseilog111063/git_docker_handson_simple
+cd laravel-docker-handson</pre>
+        DockerfileやREADME.md、src/ディレクトリが含まれていることを確認
+      </li>
+      <li><b>2. ここがポイント！</b>
+        <ul>
+          <li><b>ソースコードと環境構成（Dockerfile等）がセットで管理・共有できる</b></li>
+          <li>チーム全員が「同じ手順・同じ環境」で開発できる</li>
+        </ul>
+      </li>
+    </ul>
+    <hr>
+    <b>9-3. クローンしたリポジトリでビルド＆コンテナ起動</b>
+    <ul>
+      <li><b>1. Dockerイメージをビルド</b>
+        <pre>docker build -t my-laravel .</pre>
+        -tでイメージ名を指定
+      </li>
+      <li><b>2. コンテナを起動</b>
+        <pre>docker run -d -p 8080:80 --name my-laravel my-laravel</pre>
+        http://localhost:8080/ でLaravelのWelcome画面が表示されることを確認
+      </li>
+      <li><b>3. コンテナの中に入ってみる</b>
+        <pre>docker exec -it my-laravel bash</pre>
+        <ul>
+          <li>ls /var/www/html でLaravelプロジェクトの中身を確認</li>
+          <li>exitで抜ける</li>
+        </ul>
+      </li>
+      <li><b>4. コンテナを削除してみる</b>
+        <pre>docker stop my-laravel
+docker rm my-laravel</pre>
+        <b>ポイント</b>: コンテナを削除すると中のデータも消える（使い捨ての思想）
+      </li>
+    </ul>
+    <hr>
+    <b>9-4. ボリュームマウントの体験（補足）</b>
+    <ul>
+      <li><b>1. ホスト側でsrcディレクトリを用意</b>
+        <pre>mkdir -p src</pre>
+      </li>
+      <li><b>2. ボリュームマウントしてコンテナを起動</b>
+        <pre>docker run -d -p 8080:80 -v $(pwd)/src:/var/www/html --name my-laravel my-laravel</pre>
+        srcディレクトリがコンテナの/var/www/htmlと同期される
+      </li>
+      <li><b>3. 初回のみLaravelプロジェクトを作成</b>
+        <pre>docker exec -it my-laravel bash
+composer create-project laravel/laravel . "^12.0"
+exit</pre>
+        以降、srcの中身はホスト側に永続化される
+      </li>
+      <li><b>4. コンテナを削除してもsrcの中身は残る</b>
+        <pre>docker stop my-laravel
+docker rm my-laravel
+ls src</pre>
+        <b>ポイント</b>: ボリュームを使うと「データの永続化」「ホストとコンテナのファイル共有」ができる
+      </li>
+    </ul>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="handson_flow.html">◀ 前へ</a>
+  <a href="index.html">目次</a>
+  <a href="handson_trouble.html">次へ ▶</a>
+</div>
+
+</main>
+</body>
+</html> 

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DockerでLaravelを動かそう！ 用語とライフサイクル</title>
+  <meta name="viewport" content="width=1024">
+  <style>
+    body { font-family: 'Yomogi', 'Zen Kurenaido', 'Kaisei Decol', sans-serif; background: #fff; color: #334155; margin: 0; padding: 0; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .section-card { background: #fff; border-left: 8px solid #F25C05; border-radius: 10px; margin-bottom: 32px; box-shadow: 0 2px 8px 0 rgba(89,60,71,0.06); padding: 28px 24px 18px 24px; }
+    .section-title { font-size: 1.6em; font-weight: bold; color: #1e293b; display: flex; align-items: center; margin-bottom: 0.7em; }
+    .section-title .icon { margin-right: 10px; font-size: 1.2em; }
+    .info-list, .info-list ul, .info-list ol { font-size: 1em; line-height: 1.7; margin-left: 1.5em; }
+    .mermaid { background: #f8fafc; border-radius: 8px; padding: 12px; margin: 16px 0; font-size: 13px; box-shadow: 0 1px 4px 0 rgba(242,197,60,0.08); }
+    img { max-width: 100%; margin: 16px 0; border-radius: 8px; border: 1px solid #eee; }
+    pre, code { background: #f8fafc; border-radius: 4px; padding: 2px 6px; font-size: 0.98em; color: #593C47; }
+    pre { padding: 12px; overflow-x: auto; margin: 1em 0; }
+    a { color: #F25C05; text-decoration: underline; }
+    .nav { margin-top: 2em; }
+    .nav a { margin-right: 1.5em; font-weight: bold; }
+  </style>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+<main>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">📦</span>4. 覚えるのはこの3語</div>
+  <div class="info-list">
+    <ul>
+      <li><b>Image（イメージ）</b><br>
+        アプリケーションを動かすための「設計図」や「レシピ」のようなものです。<br>
+        どんなOS・ミドルウェア・アプリ本体・設定が必要かをまとめた"ひな型"で、Dockerfileから作成されます。<br>
+        例えるなら「料理のレシピ本」。このレシピから何度でも同じ料理（＝コンテナ）を作れます。
+      </li>
+      <li><b>Container（コンテナ）</b><br>
+        イメージをもとに実際に動かす「実体」です。<br>
+        料理で言えば、レシピから作った"できあがった料理"そのもの。<br>
+        コンテナは「使い捨て」が前提で、壊してもまたイメージからすぐ作り直せます。<br>
+        1つのイメージから複数のコンテナを同時に作ることも可能です。
+      </li>
+      <li><b>Volume（ボリューム）</b><br>
+        コンテナの外にある「データの保存場所」や「倉庫」のようなものです。<br>
+        コンテナは削除すると中のデータも消えますが、ボリュームに保存したデータはコンテナを消しても残ります。<br>
+        例えば、アプリのアップロードファイルやDBデータなど、消したくないデータをボリュームに保存します。<br>
+        複数のコンテナで同じボリュームを共有することもできます。
+      </li>
+    </ul>
+    <img src="images/Image_container_volume_relation.png" alt="Image/Container/Volumeの関係図（イメージ）">
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">🔄</span>5. Dockerのイメージとコンテナのライフサイクル</div>
+  <div class="info-list">
+    <ul>
+      <li><b>イメージ</b>：DockerHubからpull or buildで作成</li>
+      <li><b>コンテナ</b>：イメージからrunで作成、Created→Up→Exitedの状態遷移</li>
+      <li>コンテナは削除できる（Exited状態でのみ）</li>
+      <li>イメージも削除可能</li>
+    </ul>
+    <b>スクラップアンドビルドの思想</b>
+    <ul>
+      <li>Dockerのコンテナは「スクラップアンドビルド（壊して作り直す）」が前提</li>
+      <li><b>コンテナは使い捨て</b>：壊しても、また同じイメージからすぐに新しいコンテナを作れる</li>
+      <li>これにより「環境が壊れてもすぐ再現」「テストや検証も気軽にできる」</li>
+      <li><b>本番運用でも"壊して作り直す"ことで常にクリーンな状態を保てる</b></li>
+    </ul>
+    <div class="mermaid">
+flowchart LR
+    subgraph イメージ
+        A[Image]
+    end
+    subgraph コンテナ
+        B["Container<br/>(Created)"]
+        C["Container<br/>(Up)"]
+        D["Container<br/>(Exited)"]
+    end
+    A -- "docker run" --> B
+    B -- "起動" --> C
+    C -- "停止" --> D
+    D -- "docker rm" --> X((削除))
+    style A fill:#e3f2fd,stroke:#2196f3,stroke-width:2px
+    style B fill:#fffde7,stroke:#fbc02d,stroke-width:2px
+    style C fill:#e8f5e9,stroke:#43a047,stroke-width:2px
+    style D fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px
+</div>
+    <pre># 1. Ubuntuイメージを取得（pull）
+docker image pull ubuntu
+
+# 2. Ubuntuコンテナを起動し、シェルに入る
+# （-it: 対話モード、bash: シェル起動）
+docker run -it ubuntu
+
+# 3. すべてのコンテナ一覧を表示（-a: 停止中も含む）
+docker container ls -a
+
+# 4. コンテナを停止（IDはls -aで確認）
+docker container stop <ID>
+
+# 5. 停止したコンテナを削除
+docker container rm <ID>
+
+# 6. イメージを削除（IDはdocker imagesで確認）
+docker image rm ubuntu
+</pre>
+    <a href="https://qiita.com/kenny_J_7/items/ef4a5eb412ff943410e3" target="_blank">Qiita: Dockerのイメージ/コンテナのライフサイクルと基本操作</a>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="handson_intro.html">◀ 前へ</a>
+  <a href="index.html">目次</a>
+  <a href="handson_flow.html">次へ ▶</a>
+</div>
+
+</main>
+</body>
+</html> 

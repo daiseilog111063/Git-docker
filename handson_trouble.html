@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>DockerでLaravelを動かそう！ トラブルシュート・まとめ</title>
+  <meta name="viewport" content="width=1024">
+  <style>
+    body { font-family: 'Yomogi', 'Zen Kurenaido', 'Kaisei Decol', sans-serif; background: #fff; color: #334155; margin: 0; padding: 0; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+    .section-card { background: #fff; border-left: 8px solid #F25C05; border-radius: 10px; margin-bottom: 32px; box-shadow: 0 2px 8px 0 rgba(89,60,71,0.06); padding: 28px 24px 18px 24px; }
+    .section-title { font-size: 1.6em; font-weight: bold; color: #1e293b; display: flex; align-items: center; margin-bottom: 0.7em; }
+    .section-title .icon { margin-right: 10px; font-size: 1.2em; }
+    .info-list, .info-list ul, .info-list ol { font-size: 1em; line-height: 1.7; margin-left: 1.5em; }
+    pre, code { background: #f8fafc; border-radius: 4px; padding: 2px 6px; font-size: 0.98em; color: #593C47; }
+    pre { padding: 12px; overflow-x: auto; margin: 1em 0; }
+    a { color: #F25C05; text-decoration: underline; }
+    .nav { margin-top: 2em; }
+    .nav a { margin-right: 1.5em; font-weight: bold; }
+  </style>
+</head>
+<body>
+<main>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">🛠️</span>10. よくあるエラー・トラブル時のヒント</div>
+  <div class="info-list">
+    <ul>
+      <li><b>Directory is not empty</b><br>→ <code>src</code>が空でないとcreate-projectでエラー</li>
+      <li><b>Permission denied</b><br>→ <code>src</code>の権限を確認（chmod/chown）</li>
+      <li><b>ポート競合</b><br>→ 8080番ポートが他で使われていないか確認</li>
+      <li>困ったら <code>docker logs</code> や <code>docker exec -it ... bash</code> で中を見てみよう</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-title"><span class="icon">📝</span>11. まとめ</div>
+  <div class="info-list">
+    <ul>
+      <li><b>Dockerを使うことで「どこでも同じ環境」を簡単に再現できる</b><br>→ 環境差分による「動かない」を根本から解決できる</li>
+      <li><b>GitHubでソースコードと環境構成（Dockerfile等）をセットで管理・共有できる</b><br>→ チーム全員が「同じ手順・同じ環境」で開発・検証できる</li>
+      <li><b>コンテナは"使い捨て"が前提（スクラップアンドビルド）</b><br>→ 壊してもすぐ再現できるので、トラブル時も安心してリセットできる</li>
+      <li><b>ボリュームは"データの永続化"や"ホストとのファイル共有"に便利なオプション</b><br>→ 必要に応じて使い分けることで、開発効率や運用の柔軟性が高まる</li>
+      <li><b>今回のハンズオンで得た知識・体験は、現場の開発や本番運用でも必ず役立つ！</b></li>
+    </ul>
+  </div>
+</div>
+
+<div class="nav">
+  <a href="handson_hands_on.html">◀ 前へ</a>
+  <a href="index.html">目次</a>
+</div>
+
+</main>
+</body>
+</html> 
